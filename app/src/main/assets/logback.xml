@@ -1,0 +1,92 @@
+<configuration debug="true" scan="true" scanPeriod="60 seconds">
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
+
+    <!-- All Eroad log files are written to here -->
+    <property name="LOG_DIR" value="/sdcard/com.eroad/logs" />
+
+    <!-- Declare Eroad custom words that can be included in pattern strings -->
+    <conversionRule conversionWord="serialNumber" converterClass="com.eroad.logging.SerialNumberConverter" />
+    <conversionRule conversionWord="imei" converterClass="com.eroad.logging.ImeiConverter" />
+    <conversionRule conversionWord="simSerialNumber" converterClass="com.eroad.logging.SimSerialNumberConverter" />
+    <!-- this appender is for when running from console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%serialNumber] %-20.20([%thread]) %-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- this appender is for logcat -->
+    <appender name="LOGCAT" class="ch.qos.logback.classic.android.LogcatAppender">
+        <tagEncoder>
+            <pattern>%logger{20}</pattern>
+        </tagEncoder>
+        <encoder>
+            <pattern>[%serialNumber] %msg</pattern>
+        </encoder>
+    </appender>
+
+    <!-- this appender is for rolling log file -->
+    <appender name="LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${PACKAGE_NAME}.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover to a compressed file in the archived directory -->
+            <fileNamePattern>${LOG_DIR}/archived/${PACKAGE_NAME}.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+
+            <!-- each file should be at most 5MB, keep 30 days worth of history, but at most 500MB -->
+            <maxFileSize>5MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSS} [%serialNumber] %-20.20([%thread]) %-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- this appender is for rolling json file -->
+    <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${PACKAGE_NAME}.json</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover to a compressed file in the archived directory -->
+            <fileNamePattern>${LOG_DIR}/archived/${PACKAGE_NAME}.%d{yyyy-MM-dd}.%i.json.gz</fileNamePattern>
+
+            <!-- each file should be at most 5MB, keep 30 days worth of history, but at most 500MB -->
+            <maxFileSize>5MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>
+                        {
+                        "serialNumber": "%serialNumber",
+                        "logger": "%logger",
+                        "level": "%level",
+                        "thread": "%thread",
+                        "message": "%message",
+                        "package": "${PACKAGE_NAME}",
+                        "version": "${VERSION_NAME}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Logging events from all foundation services go to LOG_FILE -->
+    <!-- The log level could be dynamically changed from the code -->
+    <logger name="com.eroad" level="DEBUG">
+        <appender-ref ref="LOG_FILE" />
+    </logger>
+
+    <root level="DEBUG">
+        <appender-ref ref="LOGCAT" />
+    </root>
+
+</configuration>

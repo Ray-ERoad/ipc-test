@@ -29,6 +29,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
 }
 
 dependencies {
@@ -44,4 +49,17 @@ dependencies {
     implementation 'software.amazon.awssdk.crt:aws-crt:0.6.5'
     implementation "software.amazon.awssdk.iotdevicesdk:aws-iot-device-sdk:1.2.6"
     implementation "com.amazonaws:aws-android-sdk-s3:2.25.0"
+    implementation "com.amazonaws:aws-android-sdk-iot:2.25.0"
+    implementation 'org.slf4j:slf4j-api:1.7.29'
+    implementation 'com.github.tony19:logback-android:2.0.0'
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(name:'com.eroad.sharelib.aws-0.1.3-release', ext:'aar')
+    implementation(name:'com.eroad.sharelib.logger-0.1.5-release', ext:'aar')
+    implementation(name:'com.eroad.sharelib.utils-1.0.3-release', ext:'aar')
+    implementation(name:'com.eroad.sharelib.security-0.1.4-release', ext:'aar')
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+//    implementation (name:DependencyLibs.aws_lib_name,ext:DependencyLibs.aar_ext,)
+//    implementation (name:DependencyLibs.security_lib_name,ext:DependencyLibs.aar_ext)
+//    implementation (name:DependencyLibs.logger_lib_name,ext:DependencyLibs.aar_ext)
 }

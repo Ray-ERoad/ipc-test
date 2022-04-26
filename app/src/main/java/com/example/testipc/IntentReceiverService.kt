@@ -9,16 +9,33 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import java.util.*
 import kotlin.collections.HashMap
+import kotlin.concurrent.thread
 
 class IntentReceiverService : Service() {
     private var hasSetup = false
     private var dictionary: HashMap<String, Int> = hashMapOf<String, Int>()
+    private var lastMessage = ""
+    private lateinit var iotMessenger: IotMessenger
+
     override fun onCreate() {
         super.onCreate()
         Log.d("IntentReceiverService", "=================Intent Receiver Service Started=================")
-
+        iotMessenger = IotMessenger()
         setup()
+        continuouslyUploadData()
+    }
+
+    private fun continuouslyUploadData() {
+        Thread {
+            while (true) {
+                if (lastMessage.isNotEmpty()) {
+                    iotMessenger.addMessage(lastMessage)
+                    Thread.sleep(10000) // sleep 10s
+                }
+            }
+        }.start()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -36,11 +53,12 @@ class IntentReceiverService : Service() {
 
         dictionary[name] = count
 
+        lastMessage = data
         Log.d("IntentReceiverService", "Data: $data")
 
-        if (count % 1111 == 0) {
-            stopSelf()
-        }
+//        if (count % 1111 == 0) {
+//            stopSelf()
+//        }
         setup()
         return START_STICKY
     }
