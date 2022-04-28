@@ -16,6 +16,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
+        <service android:name="com.example.protocol.RemoteService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.protocol.IRemoteService"/>
+            </intent-filter>
+        </service>
         <activity
             android:name=".MainActivity"
             android:exported="true">
