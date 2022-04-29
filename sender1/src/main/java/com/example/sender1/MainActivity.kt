@@ -1,45 +1,57 @@
 package com.example.sender1
 
-import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.Intent
+import android.os.*
+import android.util.Log
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
+import com.example.ipcmessenger.IpcMessenger
+import com.example.ipcmessenger.MessengerCallback
 
 class MainActivity : AppCompatActivity() {
     private var count: Int = 0
+    private lateinit var ipcMessenger: IpcMessenger
+    private var isMessengerBound = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        ipcMessenger = IpcMessenger(this)
+        sendMessage()
+        findViewById<Button>(R.id.send_message_button).setOnClickListener {
+            useMessenger()
+        }
+    }
 
+    private fun useMessenger() {
+        ipcMessenger.bindUsingMessage(object: MessengerCallback {
+            override fun onConnected() {
+                Log.d("MainActivity", "App1 messenger connected")
+                isMessengerBound = true
+            }
+
+            override fun onDisconnected() {
+                Log.d("MainActivity", "App1 messenger disconnected")
+                isMessengerBound = false
+            }
+
+            override fun onReceived(message: String) {
+                Log.d("MainActivity", "App1 messenger received message: $message")
+            }
+        })
+    }
+
+    fun sendMessage() {
         Thread {
-            while(true) {
-                for (i in 0..200) {
-                    count++
-//                    startService()
-                    sendBroadcast()
-                }
+            while (true) {
+                if (isMessengerBound == false) continue
 
+                for (i in 1 .. 200) {
+                    count++
+                    ipcMessenger.sendMessengerMessage("App1: $count")
+                }
                 Thread.sleep(1000)
             }
         }.start()
     }
-
-    private fun startService() {
-        val componentName = ComponentName("com.example.testipc", "com.example.testipc.IntentBroadcastReceiver")
-        val intent = Intent()
-        intent.component = componentName
-        intent.putExtra("Data", "App1: $count")
-        this.startForegroundService(intent)
-    }
-
-    private fun sendBroadcast() {
-        Intent().also { intent ->
-            intent.component = ComponentName("com.example.testipc", "com.example.testipc.IntentBroadcastReceiver")
-            intent.setAction("com.test.intent.action.DEFAULT")
-            intent.putExtra("Data", "App1: $count")
-            sendBroadcast(intent)
-        }
-    }
 }
+

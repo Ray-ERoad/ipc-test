@@ -15,7 +15,16 @@
         <service android:name=".IntentReceiverService"
             android:exported="true">
             <intent-filter>
+                <action android:name="messengerexample" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".MessengerService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MESSENGER"/>
             </intent-filter>
         </service>
         <receiver android:name=".IntentBroadcastReceiver"  android:exported="true">
