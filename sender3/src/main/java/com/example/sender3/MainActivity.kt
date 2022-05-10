@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
                 for (i in 0..100) {
                     count++
                     Intent().also { intent ->
-                        intent.component = ComponentName("com.example.testipc", "com.example.testipc.IntentBroadcastReceiver")
                         intent.setAction("com.test.intent.action.DEFAULT")
                         intent.putExtra("Data", "App3: $count")
                         sendBroadcast(intent)
